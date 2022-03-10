@@ -226,17 +226,17 @@ namespace bes {
 					return 0;
 				}
 				inline min(size_t x,size_t y){
-					return (x<y):x?y;
+					return (x<y)?x:y;
 				}
 				inline max(size_t x,size_t y){
-					return (x>y):x?y;
+					return (x>y)?x:y;
 				}
 			}
 			bool str::operator==(str& x){
 				size_t len=length();
 				if (len!=x.length())return false;
 				else {
-					char p=function::str_op(*this.c_str,x.c_str,len);
+					char p=function::str_op((*this).c_str,x.c_str,len);
 					if (p==0)return true;
 					else return false;
 				}
@@ -245,34 +245,32 @@ namespace bes {
 				size_t len=length();
 				if (len!=x.length())return true;
 				else {
-					char p=function::str_op(*this.c_str,x.c_str,len);
+					char p=function::str_op((*this).c_str,x.c_str,len);
 					if (p==0)return false;
 					else return true;
 				}
 			}
 			bool str::operator>=(str& x){
-				char p=function::str_op(*this.c_str,x.c_str,len);
+				char p=function::str_op((*this).c_str,x.c_str,len);
 				if (p!=-1)return true;
 				return false;
 			}
 			bool str::operator<=(str& x){
-				char p=function::str_op(*this.c_str,x.c_str,len);
+				char p=function::str_op((*this).c_str,x.c_str,len);
 				if (p!=1)return true;
 				return false;
 			}
 			bool str::operator>(str& x){
-				char p=function::str_op(*this.c_str,x.c_str,len);
+				char p=function::str_op((*this).c_str,x.c_str,len);
 				if (p==1)return true;
 				return false;
 			}
 			bool str::operator<(str& x){
-				char p=function::str_op(*this.c_str,x.c_str,len);
+				char p=function::str_op((*this).c_str,x.c_str,len);
 				if (p==-1)return true;
 				return false;
 			}
-			template <class T>{
-
-			}
+			template <class T>
 		}
 	}
 }
