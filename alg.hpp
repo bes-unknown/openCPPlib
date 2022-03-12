@@ -40,7 +40,7 @@ namespace bes {
 				str strcopy();
 				str& reverse();
 				str operator()(size_t);
-				str operator()(size_t,size_t);
+				str operator()(size_t, size_t);
 				str operator=(str&);
 				void push_back(char);
 				void push_back(str&);
@@ -52,27 +52,26 @@ namespace bes {
 				bool operator>(str&);
 				bool operator<(str&);
 			};
-			template <class T> class vec{
+			template <class T> class vec {
 			private:
 				allocator data;
-				size_t length;
+				size_t len;
 			public:
+				T* ptr;
 				vec();
 				vec(vec<T>&);
 				void push(T);
 				T pop();
+				T top();
 				size_t size();
 				size_t size_of();
 				size_t length();
-			};
-			template
-			typedef struct{size_t father;size_t son[256];T* ptr} str_map_object;
-			template <class T> class str_map{
-			private:
-				allocator self;
-				allocator data;
-			public:
-				str_map();
+				T& operator[](size_t);
+				vec<T> operator=(vec<T>&);
+				vec<T> operator+(vec<T>&);
+				vec<T> veccopy();
+				vec<T> operator()(size_t);
+				vec<T> operator()(size_t, size_t);
 			};
 			allocator::allocator() {
 				ptr = malloc(0);
@@ -114,7 +113,7 @@ namespace bes {
 				return max;
 			}
 			str::str() {
-				c_str = (char *)self.ptr;
+				c_str = (char*)self.ptr;
 				return;
 			}
 			namespace function {
@@ -130,7 +129,7 @@ namespace bes {
 					return;
 				}
 			}
-			str::str(char * x) {
+			str::str(char* x) {
 				size_t length = function::get_c_str_length(x);
 				self.resize(length);
 				c_str = (char*)self.ptr;
@@ -138,7 +137,10 @@ namespace bes {
 				return;
 			}
 			str::str(char x) {
-				str(&x, 1);
+				self.resize(1);
+				c_str = (char*)self.ptr;
+				c_str[0] = x;
+				return;
 			}
 			str::str(char* x, size_t length) {
 				self.resize(length);
@@ -150,7 +152,7 @@ namespace bes {
 				size_t len = string0.length();
 				self.resize(len);
 				c_str = (char*)self.ptr;
-				function::strcpy(c_str,string0.c_str,len);
+				function::strcpy(c_str, string0.c_str, len);
 				return;
 			}
 			size_t str::size() {
@@ -166,8 +168,7 @@ namespace bes {
 				return c_str[index];
 			}
 			str str::strcopy() {
-				str ret(c_str,length());
-				return ret;
+				return *this;
 			}
 			namespace function {
 				inline void swap(char& x, char& y) {
@@ -201,76 +202,136 @@ namespace bes {
 			}
 			void str::push_back(char c) {
 				self.upsize(1);
-				c_str=(char*)self.ptr;
-				c_str[length()-1]=c;
+				c_str = (char*)self.ptr;
+				c_str[length() - 1] = c;
 				return;
 			}
-			void str::push_back(str& x){
-				size_t len=length();
+			void str::push_back(str& x) {
+				size_t len = length();
 				self.upsize(x.length());
-				c_str=(char*)self.ptr;
-				function::strcpy(c_str+len,x.c_str,x.length());
+				c_str = (char*)self.ptr;
+				function::strcpy(c_str + len, x.c_str, x.length());
 				return;
 			}
-			str str::operator+(str& x){
+			str str::operator+(str& x) {
 				str ret(*this);
 				ret.push_back(x);
 				return ret;
 			}
-			namespace function{
-				char str_op(char *a,char *b,size_t length){
-					for (size_t i=0;i<length;i++){
-						if (a[i]>b[i])return 1;
-						else if (a[i]<b[i])return -1;
+			namespace function {
+				char str_op(char* a, char* b, size_t length) {
+					for (size_t i = 0; i < length; i++) {
+						if (a[i] > b[i])return 1;
+						else if (a[i] < b[i])return -1;
 					}
 					return 0;
 				}
-				inline min(size_t x,size_t y){
-					return (x<y)?x:y;
+				inline size_t min(size_t x, size_t y) {
+					return (x < y) ? x : y;
 				}
-				inline max(size_t x,size_t y){
-					return (x>y)?x:y;
+				inline size_t max(size_t x, size_t y) {
+					return (x > y) ? x : y;
 				}
 			}
-			bool str::operator==(str& x){
-				size_t len=length();
-				if (len!=x.length())return false;
+			bool str::operator==(str& x) {
+				size_t len = length();
+				if (len != x.length())return false;
 				else {
-					char p=function::str_op((*this).c_str,x.c_str,len);
-					if (p==0)return true;
+					char p = function::str_op((*this).c_str, x.c_str, len);
+					if (p == 0)return true;
 					else return false;
 				}
 			}
-			bool str::operator!=(str& x){
-				size_t len=length();
-				if (len!=x.length())return true;
+			bool str::operator!=(str& x) {
+				size_t len = length();
+				if (len != x.length())return true;
 				else {
-					char p=function::str_op((*this).c_str,x.c_str,len);
-					if (p==0)return false;
+					char p = function::str_op((*this).c_str, x.c_str, len);
+					if (p == 0)return false;
 					else return true;
 				}
 			}
-			bool str::operator>=(str& x){
-				char p=function::str_op((*this).c_str,x.c_str,len);
-				if (p!=-1)return true;
+			bool str::operator>=(str& x) {
+				size_t len = length();
+				char p = function::str_op((*this).c_str, x.c_str, len);
+				if (p != -1)return true;
 				return false;
 			}
-			bool str::operator<=(str& x){
-				char p=function::str_op((*this).c_str,x.c_str,len);
-				if (p!=1)return true;
+			bool str::operator<=(str& x) {
+				size_t len = length();
+				char p = function::str_op((*this).c_str, x.c_str, len);
+				if (p != 1)return true;
 				return false;
 			}
-			bool str::operator>(str& x){
-				char p=function::str_op((*this).c_str,x.c_str,len);
-				if (p==1)return true;
+			bool str::operator>(str& x) {
+				size_t len = length();
+				char p = function::str_op((*this).c_str, x.c_str, len);
+				if (p == 1)return true;
 				return false;
 			}
-			bool str::operator<(str& x){
-				char p=function::str_op((*this).c_str,x.c_str,len);
-				if (p==-1)return true;
+			bool str::operator<(str& x) {
+				size_t len = length();
+				char p = function::str_op((*this).c_str, x.c_str, len);
+				if (p == -1)return true;
 				return false;
 			}
-			template <class T>
+			template <class T> vec<T>::vec() {
+				length = 0;
+				return;
+			}
+			template <class T> vec<T>::vec(vec<T>& vec0) {
+				len = vec0.length();
+				data.resize(sizeof(T) * len);
+				ptr = (T*)data.ptr;
+				strcpy((char*)ptr, (char*)vec0.ptr, sizeof(T) * len);
+				return;
+			}
+			template <class T>void vec<T>::push(T x) {
+				data.upsize(sizeof(T));
+				ptr = (T*)data.ptr;
+				ptr[len] = x;
+				++len;
+				return;
+			}
+			template <class T>T vec<T>::pop() {
+				--len;
+				T ret = ptr[len];
+				data.downsize(sizeof(T));
+				ptr = (T*)data.ptr;
+				return ret;
+			}
+			template <class T>T vec<T>::pop() {
+				return ptr[len-1];
+			}
+			template <class T> size_t vec<T>::size() {
+				return len;
+			}
+			template <class T> size_t vec<T>::length() {
+				return len;
+			}
+			template <class T> size_t vec<T>::size_of() {
+				return len * sizeof(T);
+			}
+			template <class T> T& vec<T>::operator[](size_t index) {
+				return ptr[index];
+			}
+			template <class T> vec<T> vec<T>::operator=(vec<T>& x) {
+				len = x.length();
+				data.resize(sizeof(T) * len);
+				ptr = (T*)data.ptr;
+				strcpy((char*)ptr, (char*)x.ptr, sizeof(T) * len);
+				return;
+			}
+			template <class T> vec<T> vec<T>::operator+(vec<T>& x) {
+				return;
+			}
+			template <class T> vec<T> vec<T>::veccopy() {
+				vec<T> ret;
+				return ret;
+			}
+			template <class T> vec<T> vec<T>::operator()(size_t index) {
+				;
+			}
 		}
 	}
 }
